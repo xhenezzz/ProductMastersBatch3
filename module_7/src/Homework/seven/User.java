@@ -1,13 +1,18 @@
 package Homework.seven;
 
 public class User {
-  private final String name;
+  private final String username;
 
-  public User(String name) {
-    this.name = name;
+  public User(String username) {
+    this.username = username;
   }
 
-  public String getName() {
-    return name;
+  public String getUsername() {
+    return username;
+  }
+
+  @Override
+  public String toString() {
+    return username;
   }
 }
