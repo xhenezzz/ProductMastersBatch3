@@ -27,10 +27,30 @@ public class FlowerController {
         return flowerService.getFlowerById(id);
     }
 
-    @PostMapping()
+    @PostMapping("/create")
     public FlowerDto createFlower(
             @RequestBody FlowerDto flower
     ) {
         return flowerService.createFlower(flower);
     }
+
+    @DeleteMapping("/{id}")
+    public String deleteFlower(@PathVariable Integer id) {
+        flowerService.deleteFlowerById(id);
+        return "Flower with id " + id + " deleted";
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public List<FlowerDto> getFlowersByCategory(@PathVariable Integer categoryId) {
+        return flowerService.getFlowersByCategoryId(categoryId);
+    }
+
+    @PutMapping("/{id}")
+    public Flower updateFlower(
+            @PathVariable Integer id,
+            @RequestBody FlowerDto flowerDto
+    ) {
+        return flowerService.updateFlower(id, flowerDto);
+    }
+
 }
