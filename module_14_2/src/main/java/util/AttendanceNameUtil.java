@@ -1,4 +1,4 @@
-package org.example.util;
+package main.java.util;
 
 public class AttendanceNameUtil {
 

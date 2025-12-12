@@ -17,16 +17,25 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
-        http.authorizeHttpRequests(auth ->
-                        auth.requestMatchers(HttpMethod.GET, "/api/flowers/", "/api/flowers/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/flowers").hasRole("ADMIN")
-                                .anyRequest().authenticated())
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
                 .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        // --- FLOWERS ---
+                        .requestMatchers(HttpMethod.GET, "/api/flowers", "/api/flowers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/flowers").hasRole("ADMIN")
+
+                        // --- CATEGORY ---
+                        .requestMatchers(HttpMethod.GET, "/api/category/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/category").hasRole("ADMIN")
+
+                        .anyRequest().authenticated()
+                )
                 .httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
+
 
     @Bean
     public UserDetailsService users(){
@@ -41,6 +50,7 @@ public class SecurityConfiguration {
                         .build()
         );
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -99,7 +99,7 @@ public class FlowersServiceImplTest {
         FlowerDto result = flowerService.createFlower(inputFlowerDto);
         //
         //
-        Assertions.assertEquals("Пионы", result.getName());
+        Assertions.assertEquals("Роза", result.getName());
         Assertions.assertEquals(1, result.getCategory().getId());
     }
 

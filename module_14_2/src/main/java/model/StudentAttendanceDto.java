@@ -1,4 +1,4 @@
-package org.example.model;
+package main.java.model;
 
 import lombok.Builder;
 import lombok.Getter;

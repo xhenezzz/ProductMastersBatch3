@@ -1,12 +1,13 @@
-package org.example;
+package main.java;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.model.StudentAttendanceDto;
-import org.example.util.AttendanceNameUtil;
+import jakarta.servlet.http.HttpSession;
+import main.java.model.StudentAttendanceDto;
+import main.java.util.AttendanceNameUtil;
 
 import java.io.*;
 import java.sql.*;
@@ -32,6 +33,14 @@ public class StudentAttendanceServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("role") == null) {
+            resp.sendRedirect("/ServletPractice/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("role");
+
         List<StudentAttendanceDto> list = getStudentsFromDB();
 
         resp.setContentType("text/html; charset=UTF-8");
@@ -55,12 +64,16 @@ public class StudentAttendanceServlet extends HttpServlet {
         out.println("<body>");
         out.println("<h2>Посещение лекций</h2>");
 
-        out.println("<form action='/ServletPractice/attendance' method='POST'>");
-        out.println("ФИО: <input type='text' name='name' required><br>");
-        out.println("Группа: <input type='text' name='groupName' required><br>");
-        out.println("Посетил: <select name='isAttended'><option value='true'>Да</option><option value='false'>Нет</option></select><br>");
-        out.println("<input type='submit' value='Добавить'>");
-        out.println("</form>");
+        if (!role.equals("STUDENT")) {
+            out.println("<form action='/ServletPractice/attendance' method='POST'>");
+            out.println("ФИО: <input type='text' name='name' required><br>");
+            out.println("Группа: <input type='text' name='groupName' required><br>");
+            out.println("Посетил: <select name='isAttended'><option value='true'>Да</option><option value='false'>Нет</option></select><br>");
+            out.println("<input type='submit' value='Добавить'>");
+            out.println("</form>");
+        } else {
+            out.println("<p style='color: gray;'>Студентам запрещено добавлять данные.</p>");
+        }
 
         out.println("<table>");
         out.println("    <tr>\n" +
@@ -68,10 +81,12 @@ public class StudentAttendanceServlet extends HttpServlet {
                 "            <th>Группа</th>\n" +
                 "            <th>Посетил</th>\n" +
                 "        </tr>");
+
         if (list.isEmpty()) {
             out.println("</table>");
             out.println("<h1>Нет данных в таблице<h1>");
         }
+
         for (StudentAttendanceDto studentAttendanceDto : list) {
             out.println("   <tr>\n" +
                     "            <td>" + studentAttendanceDto.getName() + "</td>\n" +
@@ -79,11 +94,12 @@ public class StudentAttendanceServlet extends HttpServlet {
                     "            <td>" + AttendanceNameUtil.fromBooleanToString(studentAttendanceDto.isAttended()) + "</td>\n" +
                     "        </tr>");
         }
+
         out.println("</table>");
     }
 
     private List<StudentAttendanceDto> getStudentsFromDB() {
-        String sql = "Select * from students";
+        String sql = "SELECT * FROM students";
         List<StudentAttendanceDto> result = new ArrayList<>();
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
@@ -106,17 +122,22 @@ public class StudentAttendanceServlet extends HttpServlet {
         return result;
     }
 
-
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        StudentAttendanceDto newStudentAttendanceInfo  = StudentAttendanceDto.builder()
-//                .name(req.getParameter("name"))
-//                .groupName(req.getParameter("groupName"))
-//                .isAttended(Boolean.parseBoolean(req.getParameter("isAttended")))
-//                .build();
-//        list.add(newStudentAttendanceInfo);
-//        saveToFile(newStudentAttendanceInfo);
-//
-//        resp.sendRedirect("/ServletPractice/attendance");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("role") == null) {
+            resp.sendRedirect("/ServletPractice/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("role");
+
+        if (role.equals("STUDENT")) {
+            resp.sendError(403, "Студентам запрещено добавлять данные.");
+            return;
+        }
+
+        resp.sendRedirect("/ServletPractice/attendance");
     }
 }
